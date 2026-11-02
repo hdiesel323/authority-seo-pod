@@ -381,32 +381,37 @@ function escapeHtml(str: string): string {
 }
 
 function getTaskHumanDefinition(t: TaskRecord, config: PodConfig): { title: string; summary: string } {
-  const topic = t.topic || "";
+  const topic = t.topic || "task.execution";
   const spec = t.spec || {};
 
-  if (topic === "seo.robots" || spec.action === "robots") {
-    return {
-      title: "2026 AI Search & Crawler Governance",
-      summary: `Generated robots.txt allowing citation engines (Perplexity, SearchBot) while gating model training scrapers for ${spec.domain || 'domain'}.`,
-    };
+  // Parse topic structure: [entity, ...actionSegments]
+  const topicParts = topic.split(".");
+  const entity = topicParts[0].charAt(0).toUpperCase() + topicParts[0].slice(1);
+  const action = topicParts.slice(1).join(" ").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "Execution";
+
+  let subject = spec.title || spec.name || spec.target || spec.domain || spec.action || "";
+  if (typeof subject === "string" && (subject.startsWith("http://") || subject.startsWith("https://"))) {
+    try {
+      subject = new URL(subject).hostname.replace(/^www\./, "");
+    } catch {}
   }
 
-  if (topic === "seo.schema" || spec.action === "schema") {
-    return {
-      title: "Schema.org Structured Data Generation",
-      summary: `Constructed valid JSON-LD ${spec.type || 'Organization'} markup for search engine rich results.`,
-    };
+  const title = subject ? `${entity} ${action}: ${subject}` : `${entity} ${action}`;
+
+  // Formulate general execution summary based on task lifecycle
+  let summary = `Autonomous execution by ${config.name} (${config.role}) for LOB: ${config.lob}.`;
+  if (t.status === "completed" && t.result) {
+    if (typeof t.result === "string") {
+      summary = `Execution completed: "${t.result.slice(0, 70)}"`;
+    } else if (typeof t.result === "object") {
+      const keys = Object.keys(t.result);
+      summary = `Completed successfully with ${keys.length} verified output field${keys.length === 1 ? "" : "s"}.`;
+    }
+  } else if (t.status === "failed") {
+    summary = `Failed: ${t.errorMessage || "Execution error encountered"}`;
+  } else if (t.status === "running") {
+    summary = `Task currently processing on edge runtime.`;
   }
 
-  if (topic === "seo.audit" || topic === "seo.meta" || spec.action === "meta") {
-    return {
-      title: "On-Page Metadata & Keyword Audit",
-      summary: "Audited title and meta description tags against character limits and target keyword density.",
-    };
-  }
-
-  return {
-    title: spec.title || topic,
-    summary: `Autonomous task processed by ${config.name} (${config.role}) for Line of Business: ${config.lob}.`,
-  };
+  return { title, summary };
 }
