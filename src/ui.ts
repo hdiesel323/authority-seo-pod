@@ -11,10 +11,17 @@ export function renderPodUiHtml(
 
   const taskRows = tasks.map((t) => {
     const statusColor = t.status === "completed" ? "#10b981" : t.status === "running" ? "#3b82f6" : t.status === "failed" ? "#ef4444" : "#f59e0b";
+    const humanDef = getTaskHumanDefinition(t, config);
     return `
       <tr>
-        <td class="mono font-xs">${t.taskId}</td>
-        <td><span class="badge-topic">${escapeHtml(t.topic)}</span></td>
+        <td class="mono font-xs">
+          <div style="font-weight: 600; color: #60a5fa;">${t.taskId}</div>
+        </td>
+        <td style="max-width: 320px;">
+          <div style="font-weight: 600; color: #f8fafc; font-size: 0.85rem;">${escapeHtml(humanDef.title)}</div>
+          <div style="color: #94a3b8; font-size: 0.74rem; line-height: 1.35; margin-top: 2px;">${escapeHtml(humanDef.summary)}</div>
+          <div style="margin-top: 4px;"><span class="badge-topic font-xs">${escapeHtml(t.topic)}</span></div>
+        </td>
         <td class="font-xs">${escapeHtml(t.source)}</td>
         <td><span class="badge" style="background: rgba(255,255,255,0.06); color: ${statusColor};">${t.status}</span></td>
         <td class="mono font-xs">${new Date(t.createdAt).toLocaleTimeString()}</td>
@@ -294,7 +301,7 @@ export function renderPodUiHtml(
         <thead>
           <tr>
             <th>Task ID</th>
-            <th>Topic</th>
+            <th>Human Definition & Topic</th>
             <th>Source</th>
             <th>Status</th>
             <th>Time</th>
@@ -371,4 +378,35 @@ function escapeHtml(str: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function getTaskHumanDefinition(t: TaskRecord, config: PodConfig): { title: string; summary: string } {
+  const topic = t.topic || "";
+  const spec = t.spec || {};
+
+  if (topic === "seo.robots" || spec.action === "robots") {
+    return {
+      title: "2026 AI Search & Crawler Governance",
+      summary: `Generated robots.txt allowing citation engines (Perplexity, SearchBot) while gating model training scrapers for ${spec.domain || 'domain'}.`,
+    };
+  }
+
+  if (topic === "seo.schema" || spec.action === "schema") {
+    return {
+      title: "Schema.org Structured Data Generation",
+      summary: `Constructed valid JSON-LD ${spec.type || 'Organization'} markup for search engine rich results.`,
+    };
+  }
+
+  if (topic === "seo.audit" || topic === "seo.meta" || spec.action === "meta") {
+    return {
+      title: "On-Page Metadata & Keyword Audit",
+      summary: "Audited title and meta description tags against character limits and target keyword density.",
+    };
+  }
+
+  return {
+    title: spec.title || topic,
+    summary: `Autonomous task processed by ${config.name} (${config.role}) for Line of Business: ${config.lob}.`,
+  };
 }
