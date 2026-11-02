@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "authority-seo-pod",
+  "main": "src/worker.ts",
+  "compatibility_date": "2024-11-01",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "authority-seo-pod-db",
+      "database_id": "5b4a48ca-a3bc-419b-bb4d-a3fc44a2de94"
+    }
+  ],
+  "services": [
+    {
+      "binding": "FACTORY_HUB",
+      "service": "factory-hub"
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
+  },
+  "observability": {
+    "enabled": true
+  }
+}
