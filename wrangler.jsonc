@@ -13,6 +13,9 @@
       "database_id": "5b4a48ca-a3bc-419b-bb4d-a3fc44a2de94"
     }
   ],
+  "ai": {
+    "binding": "AI"
+  },
   "services": [
     {
       "binding": "FACTORY_HUB",
