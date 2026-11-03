@@ -12,6 +12,7 @@ interface Env {
   POD_ROLE?: string;
   POD_LOB?: string;
   FACTORY_HUB_URL?: string;
+  FACTORY_HUB_TOKEN?: string;
 }
 
 export default {
